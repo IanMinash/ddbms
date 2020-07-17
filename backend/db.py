@@ -85,30 +85,9 @@ create_session.configure(
 # mappings and tables
 Base = declarative_base()
 
-# we need a way to create identifiers which are unique across all databases.
-# one easy way would be to just use a composite primary key, where  one value
-# is the shard id.  but here, we'll show something more "generic", an id
-# generation function.  we'll use a simplistic "id table" stored in database
-# #1.  Any other method will do just as well; UUID, hilo, application-specific,
-# etc.
 
-ids = Table("ids", Base.metadata, Column("nextid", Integer, nullable=False))
-
-
-def id_generator(ctx):
-    # in reality, might want to use a separate transaction for this.
-    with db1.connect() as conn:
-        nextid = conn.scalar(ids.select(for_update=True))
-        conn.execute(ids.update(values={ids.c.nextid: ids.c.nextid + 1}))
-    return nextid
-
-
-# table setup.  we'll store a lead table of continents/cities, and a secondary
-# table storing locations. a particular row will be placed in the database
-# whose shard id corresponds to the 'continent'.  in this setup, secondary rows
-# in 'weather_reports' will be placed in the same DB as that of the parent, but
-# this can be changed if you're willing to write more complex sharding
-# functions.
+# table setup.
+# Staff table
 
 class Staff(Base):
     __tablename__ = "staff"
