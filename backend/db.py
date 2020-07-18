@@ -109,7 +109,6 @@ class Staff(Base):
 
 # create tables
 for db in (sql_server, postgres, sqlite):
-    Base.metadata.drop_all(db)
     Base.metadata.create_all(db)
 
 
@@ -252,30 +251,33 @@ create_session.configure(
     query_chooser=query_chooser,
 )
 
-# save and load objects!
-staff = list()
-for i in range(0, 100):
-    profile = fake.simple_profile()
-    staff.append(Staff(profile["name"].split(" ")[0], profile["name"].split(" ")[
-                 1], profile["mail"], random.choice([True, False]), random.choice(["Kenya", "Uganda", "Tanzania"])))
+if __name__ == "__main__":
+    for db in (sql_server, postgres, sqlite):
+        Base.metadata.drop_all(db)
+        Base.metadata.create_all(db)
 
+    # save and load objects!
+    staff = list()
+    for i in range(0, 100):
+        profile = fake.simple_profile()
+        staff.append(Staff(profile["name"].split(" ")[0], profile["name"].split(" ")[
+            1], profile["mail"], random.choice([True, False]), random.choice(["Kenya", "Uganda", "Tanzania"])))
 
-sess = create_session()
+    sess = create_session()
 
-sess.add_all(staff)
+    sess.add_all(staff)
 
-sess.commit()
+    sess.commit()
 
-t = sess.query(Staff).get(staff[0].id)
-print(t.first_name, t.email, t.store)
+    t = sess.query(Staff).get(staff[0].id)
+    print(t.first_name, t.email, t.store)
 
+    kenyan_staff = sess.query(Staff).filter(
+        Staff.store == "Kenya"
+    )
+    print(len(kenyan_staff.all()))
 
-kenyan_staff = sess.query(Staff).filter(
-    Staff.store == "Kenya"
-)
-print(len(kenyan_staff.all()))
-
-ug_and_tz_staff = sess.query(Staff).filter(
-    Staff.store.in_(["Uganda", "Tanzania"])
-)
-print(len(ug_and_tz_staff.all()))
+    ug_and_tz_staff = sess.query(Staff).filter(
+        Staff.store.in_(["Uganda", "Tanzania"])
+    )
+    print(len(ug_and_tz_staff.all()))
