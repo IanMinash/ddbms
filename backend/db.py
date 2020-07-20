@@ -2,6 +2,8 @@ import datetime
 import os
 import uuid
 import random
+import mysql.connector
+
 
 from sqlalchemy import Column
 from sqlalchemy import create_engine
@@ -64,9 +66,9 @@ class GUID(TypeDecorator):
 
 
 postgres = create_engine(
-    f"postgresql://{os.environ.get('POSTGRES_USER')}:{os.environ.get('POSTGRES_PASS')}@{os.environ.get('POSTGRES_HOST')}/{os.environ.get('DB_NAME')}")
+    f"postgresql://chairman:salatonElvis@127.0.0.1:5432/ddbms")
 sql_server = create_engine(
-    f"mssql+pyodbc://{os.environ.get('SQLSERVER_USER')}:{os.environ.get('SQLSERVER_PASS')}@{os.environ.get('SQLSERVER_HOST')}/{os.environ.get('DB_NAME')}?driver=SQL+Server+Native+Client+11.0")
+    f"mysql+pymysql://root:$krychowiak-254$@localhost/ddbms")
 sqlite = create_engine("sqlite:///sqlite.db")
 
 # create session function.  this binds the shard ids
