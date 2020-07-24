@@ -64,12 +64,13 @@ class GUID(TypeDecorator):
                 value = uuid.UUID(value)
             return value
 
-
+# Takes database as one function.. 
 postgres = create_engine(
     f"postgresql://chairman:salatonElvis@127.0.0.1:5432/ddbms")
 sql_server = create_engine(
     f"mysql+pymysql://root:$krychowiak-254$@localhost/ddbms")
 sqlite = create_engine("sqlite:///sqlite.db")
+
 
 # create session function.  this binds the shard ids
 # to databases within a ShardedSession and returns it.
@@ -89,6 +90,11 @@ Base = declarative_base()
 
 
 # table setup.
+'''
+Have 5 relations...
+Customers,Orders,Stocks,Products,Staffs
+
+'''
 # Staff table
 
 class Staff(Base):
@@ -100,6 +106,7 @@ class Staff(Base):
     email = Column(String(250))
     active = Column(Boolean)
     store = Column(String(30))
+    store_id = Column(GUID,ForeignKey('store.store_id'))
 
     def __init__(self, first_name: str, last_name, email: str, active: bool, store: str):
         self.first_name = first_name
@@ -107,6 +114,99 @@ class Staff(Base):
         self.email = email
         self.active = active
         self.store = store
+
+# Customers tables
+
+class Customer(Base):
+    __tablename__ = 'customer'
+
+    customer_id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    first_name = Column(String(30), nullable=False)
+    last_name = Column(String(30))
+    email = Column(String(250))
+    city = Column(String(50))
+
+    def __init__(self,first_name,last_name,email,city):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.city = city
+
+class Orders(Base):
+    __tablename__ = 'orders'
+
+    order_id = Column(GUID, primary_key=True,default=uuid.uuid4)
+    customer_id = Column(GUID, ForeignKey('customer.customer_id'))
+    order_date = Column(DateTime, default=datetime.datetime.now)
+    staff_id = Column(GUID,ForeignKey('staff.id'))
+    store_id = Column(GUID,ForeignKey('store.store_id'))
+    order_status = Column(Boolean)
+
+    def __init__(self,order_status):
+        self.order_status = order_status
+    
+class Store(Base):
+    __tablename__ = 'store'
+
+    store_id = Column(GUID, primary_key=True,default=uuid.uuid4)
+    store_name = Column(String(250))
+    email = Column(String(250))
+    street = Column(String(100))
+    city = Column(String(50))
+
+    def __init__(self, store_name,email,street,city):
+        self.store_name = store_name
+        self.email = email
+        self.street= street
+        self.city = city
+
+
+
+class Order_Items(Base):
+    __tablename__ = 'order_items'
+
+    order_id = Column(GUID,ForeignKey('orders.order_id'))
+    item_id = Column(GUID,primary_key=True, default=uuid.uuid4)
+    product_id = Column(GUID,ForeignKey('products.product_id'))
+    quantity = Column(Integer)
+    discount = Column(Integer)
+
+    def __init__(self,quantity,discount):
+        self.quantity = quantity
+        self.discount=discount
+
+
+class Products(Base):
+    __tablename__ = 'products'
+
+    product_id = Column(GUID,primary_key=True,default=uuid.uuid4)
+    product_name = Column(String(250))
+    brand_id = Column(GUID, ForeignKey('brand.brand_id'))
+    category_id = Column(GUID,ForeignKey('category.category_id'))
+    list_price = Column(Integer)
+
+    def __init__(self, product_name,list_price):
+        self.product_name = product_name
+        self.list_price = list_price
+
+
+class Category(Base):
+    __tablename__ = 'category'
+
+    category_id = Column(GUID, primary_key = True, default=uuid.uuid4)
+    category_name = Column(String(250))
+
+    def __init__(self,category_name):
+        self.category_name = category_name
+        
+class Brand(Base):
+    __tablename__ = 'brand'
+
+    brand_id = Column(GUID,primary_key=True,default=uuid.uuid4)
+    brand_name = Column(String(250))
+
+    def __init__(self,brand_name):
+        self.brand_name=brand_name
 
 
 # create tables
