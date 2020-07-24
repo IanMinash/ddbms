@@ -3,6 +3,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,visualstudiocode,dotenv,node,python,virtualenv
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,visualstudiocode,dotenv,node,python,virtualenv
 
+/ddbms
+
+
+
 ### SQLite ###
 *.db
 
