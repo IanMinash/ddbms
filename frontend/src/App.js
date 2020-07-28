@@ -28,7 +28,21 @@ const theme = createMuiTheme({
   },
 });
 
-const COLUMNS = ["id", "first_name", "last_name", "email", "active", "store"];
+const COLUMNS = {
+  staff: ["id", "first_name", "last_name", "email", "active", "store"],
+  customer: ["id", "first_name", "last_name", "email", "city", "store"],
+  product: ["id", "product_name", "list_price", "store"],
+  orders: [
+    "id",
+    "customer_id",
+    "order_date",
+    "staff_id",
+    "store",
+    "order_status",
+  ],
+  order_items: ["id", "order_id", "product_id", "quantity", "store"],
+  stocks: ["id", "product_id", "quantity", "store"],
+};
 const INSERT_URL = "http://localhost:5000/insert";
 const SELECT_URL = "http://localhost:5000/select";
 
@@ -57,12 +71,21 @@ const App = () => {
             // Reject statement with more than 1 table specified
             if (ast.from.length > 1) {
               setSQLError(true);
-              setSQLErrorMessage(`Error: The only relation available is staff`);
+              setSQLErrorMessage(
+                `Error: Only selects from 1 relationship are currently supported`
+              );
               return;
             }
 
             // Reject statement where table specified is not staff
-            if (ast.from[0].table.toLowerCase() != "staff") {
+            if (
+              ast.from[0].table.toLowerCase() != "staff" &&
+              ast.from[0].table.toLowerCase() != "products" &&
+              ast.from[0].table.toLowerCase() != "orders" &&
+              ast.from[0].table.toLowerCase() != "customers" &&
+              ast.from[0].table.toLowerCase() != "order_items" &&
+              ast.from[0].table.toLowerCase() != "stocks"
+            ) {
               setSQLError(true);
               setSQLErrorMessage(
                 `Error: The relation "${ast.from[0].table}" does not exist`
@@ -71,10 +94,10 @@ const App = () => {
             }
             if (ast.columns != "*") {
               for (const column of ast.columns) {
-                if (!COLUMNS.includes(column)) {
+                if (!COLUMNS[ast.from[0]].includes(column)) {
                   setSQLError(true);
                   setSQLErrorMessage(
-                    `Error: Column "${column}" does not exist`
+                    `Error: Column "${column}" does not exist in "${ast.from[0]}"`
                   );
                   return;
                 }

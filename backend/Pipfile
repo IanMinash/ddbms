@@ -12,6 +12,8 @@ pyodbc = "*"
 psycopg2 = "*"
 faker = "*"
 autopep8 = "*"
+sqlitis = "*"
+sqlparse = "*"
 
 [requires]
 python_version = "3.8"

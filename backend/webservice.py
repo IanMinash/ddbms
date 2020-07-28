@@ -2,7 +2,7 @@ import json
 
 from flask import Flask, request, abort, jsonify, make_response
 from sqlalchemy import text
-from .db import create_session, Staff
+from .db import create_session, Staff, Product, Order, OrderItem, Customer, Stock
 
 app = Flask(__name__)
 
@@ -29,7 +29,18 @@ def select():
         raw_stmt = request.form['sql']
         sql_stmt = text(raw_stmt)
         try:
-            res = sess.query(Staff).from_statement(sql_stmt).all()
+            if "staff" in raw_stmt:
+                res = sess.query(Staff).from_statement(sql_stmt).all()
+            elif "products" in raw_stmt:
+                res = sess.query(Product).from_statement(sql_stmt).all()
+            elif "orders" in raw_stmt:
+                res = sess.query(Order).from_statement(sql_stmt).all()
+            elif "order_items" in raw_stmt:
+                res = sess.query(OrderItem).from_statement(sql_stmt).all()
+            elif "stocks" in raw_stmt:
+                res = sess.query(Stock).from_statement(sql_stmt).all()
+            elif "customers" in raw_stmt:
+                res = sess.query(Customer).from_statement(sql_stmt).all()
             res = [obj.__dict__ for obj in res]
             for obj in res:
                 obj['id'] = str(obj['id'])
